@@ -42,14 +42,14 @@ function clearGrid() {
   );
 }
 
-function getItemName(index) {
+function getItemId(index) {
   return "NOTE_" + index;
 }
 
 function buildGrid() {
   for (let i = 0; i < grid_config.getRows() * grid_config.columns; i++) {
     const item = document.createElement("div");
-    item.id = getItemName(i);
+    item.id = getItemId(i);
     item.style.border = `1px solid ${noteConfig.border}`;
     item.style.backgroundColor = noteConfig.defaultColor;
     grid.append(item);
@@ -67,7 +67,6 @@ function generateSequence() {
 function getSequenceValue(i) {
   // add swing
   if (i !== 0 && i % 7 === 0 && i % 3 === 0) return null;
-
   if (i % 8 === 0) return [getRandomNotePosition(), getRandomNotePosition()];
 
   return [getRandomNotePosition()];
@@ -77,13 +76,13 @@ function getRandomNotePosition() {
   return Math.ceil(Math.random() * grid_config.getRows());
 }
 
-function getNotePosition(coords) {
+function getNoteIndex(coords) {
   const [x, y] = coords;
   return y + (x - 1) * grid_config.columns;
 }
 
 function playNote(coords) {
-  const note = document.getElementById(getItemName(getNotePosition(coords)));
+  const note = document.getElementById(getItemId(getNoteIndex(coords)));
 
   note.classList = noteConfig.highlight;
   note.style.backgroundColor = noteConfig.highlight;

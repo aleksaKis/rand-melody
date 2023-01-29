@@ -1,38 +1,14 @@
 <head>
-  <style>
-    body,
-    html {
-      background-color: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 16px;
-      flex-direction: column;
-      font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-        "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-    }
-    .title {
-      color: white;
-    }
-    #play {
-      border: 1px solid #bbb;
-      color: #bbb;
-      padding: 8px 32px;
-      background-color: transparent;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    #grid {
-      border: 1px solid white;
-      padding: 4px;
-      transform: scaleY(-1);
-    }
-  </style>
+  <link href="./style.css" rel="stylesheet" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Notes generator app" />
+  <link rel="icon" href="images/favicon.ico" />
   <title>Notes</title>
 </head>
 <body>
   <h1 class="title">Notes</h1>
   <div id="grid"></div>
-  <button id="play">play</button>
-  <script type="module" src="src/index.js"></script>
+  <button id="_play">play</button>
+  <script type="module" src="/src/index.js"></script>
 </body>

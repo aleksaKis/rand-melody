@@ -1,8 +1,10 @@
 import { sleep } from "./utils.js";
 import { noteConfig, grid_config } from "./config.js";
+import { HIGHLIGHTED_CLASS, highlightColors } from "./style/constants.js";
 
 const PLAY_KEYWORD = "play";
 const PAUSE_KEYWORD = "pause";
+const PLAY_BUTTON_ID = "_play";
 
 const grid = document.getElementById("grid");
 grid.style.display = "grid";
@@ -17,27 +19,27 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-document.getElementById("play").addEventListener("click", togglePlay);
+document.getElementById(PLAY_BUTTON_ID).addEventListener("click", togglePlay);
 buildGrid();
 
 function togglePlay() {
-  const playButton = document.getElementById("play");
+  const playButton = document.getElementById(PLAY_BUTTON_ID);
   if (playButton.textContent === PLAY_KEYWORD) handlePlay();
   else handlePause();
 }
 
 function handlePlay() {
-  document.getElementById("play").textContent = PAUSE_KEYWORD;
+  document.getElementById(PLAY_BUTTON_ID).textContent = PAUSE_KEYWORD;
   clearGrid();
   startLink().then(handlePause);
 }
 
 function handlePause() {
-  document.getElementById("play").textContent = PLAY_KEYWORD;
+  document.getElementById(PLAY_BUTTON_ID).textContent = PLAY_KEYWORD;
 }
 
 function clearGrid() {
-  Array.from(document.getElementsByClassName(noteConfig.highlight)).forEach(
+  Array.from(document.getElementsByClassName(HIGHLIGHTED_CLASS)).forEach(
     (el) => (el.style.backgroundColor = noteConfig.defaultColor)
   );
 }
@@ -50,8 +52,7 @@ function buildGrid() {
   for (let i = 0; i < grid_config.getRows() * grid_config.columns; i++) {
     const item = document.createElement("div");
     item.id = getItemId(i);
-    item.style.border = `1px solid ${noteConfig.border}`;
-    item.style.backgroundColor = noteConfig.defaultColor;
+    item.className = "note";
     grid.append(item);
   }
 }
@@ -83,10 +84,8 @@ function getNoteIndex(coords) {
 
 function playNote(coords) {
   const note = document.getElementById(getItemId(getNoteIndex(coords)));
-
-  note.classList = noteConfig.highlight;
-  note.style.backgroundColor = noteConfig.highlight;
-
+  note.style.backgroundColor = highlightColors[Math.floor(Math.random() * 3)];
+  note.classList.add(HIGHLIGHTED_CLASS);
   const octave = Math.ceil(coords[0] / 8) + 2; // octaves are from 3 to 5
   const tone = Math.ceil(coords[0] / grid_config.octaves);
   playSound(getToneName(tone) + octave);
@@ -101,7 +100,8 @@ async function playSound(note) {
 async function startLink() {
   const sequence = generateSequence();
   for (let i = 0; i < sequence.length; i++) {
-    if (document.getElementById("play").textContent === PLAY_KEYWORD) break;
+    if (document.getElementById(PLAY_BUTTON_ID).textContent === PLAY_KEYWORD)
+      break;
     if (!sequence[i]) continue;
     for (let note of sequence[i]) {
       playNote([note, i]);

@@ -1,14 +1,14 @@
 export const noteConfig = {
-  width: 20,
+  width: 10,
   border: "#bbb",
   highlight: "#0cc",
   defaultColor: "#333333",
   playedClass: "highlight",
-  triggerDelay: 160, // ms
+  triggerDelay: 135, // ms
 };
 
-export const GRID_CONFIGURATION = {
-  columns: 64,
+export const grid_config = {
+  columns: 128,
   octaves: 3, // 1 to 3
   getRows() {
     return 8 * this.octaves;

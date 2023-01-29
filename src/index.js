@@ -1,13 +1,13 @@
 import { sleep } from "./utils.js";
-import { noteConfig, GRID_CONFIGURATION } from "./config.js";
+import { noteConfig, grid_config } from "./config.js";
 
 const PLAY_KEYWORD = "play";
 const PAUSE_KEYWORD = "pause";
 
 const grid = document.getElementById("grid");
 grid.style.display = "grid";
-grid.style.gridTemplateColumns = `repeat(${GRID_CONFIGURATION.columns}, ${noteConfig.width}px)`;
-grid.style.gridTemplateRows = `repeat(${GRID_CONFIGURATION.getRows()}, ${
+grid.style.gridTemplateColumns = `repeat(${grid_config.columns}, ${noteConfig.width}px)`;
+grid.style.gridTemplateRows = `repeat(${grid_config.getRows()}, ${
   noteConfig.width
 }px)`;
 
@@ -47,11 +47,7 @@ function getItemName(index) {
 }
 
 function buildGrid() {
-  for (
-    let i = 0;
-    i < GRID_CONFIGURATION.getRows() * GRID_CONFIGURATION.columns;
-    i++
-  ) {
+  for (let i = 0; i < grid_config.getRows() * grid_config.columns; i++) {
     const item = document.createElement("div");
     item.id = getItemName(i);
     item.style.border = `1px solid ${noteConfig.border}`;
@@ -61,34 +57,40 @@ function buildGrid() {
 }
 
 function generateSequence() {
-  const sequence = Array(GRID_CONFIGURATION.columns);
-  for (let i = 0; i < GRID_CONFIGURATION.columns; i++)
+  const sequence = Array(grid_config.columns);
+  for (let i = 0; i < grid_config.columns; i++)
     sequence[i] = getSequenceValue(i);
+
   return sequence;
 }
 
 function getSequenceValue(i) {
-  console.log(i);
   // add swing
   if (i !== 0 && i % 7 === 0 && i % 3 === 0) return null;
 
-  return Math.ceil(Math.random() * GRID_CONFIGURATION.getRows());
+  if (i % 8 === 0) return [getRandomNotePosition(), getRandomNotePosition()];
+
+  return [getRandomNotePosition()];
+}
+
+function getRandomNotePosition() {
+  return Math.ceil(Math.random() * grid_config.getRows());
 }
 
 function getNotePosition(coords) {
   const [x, y] = coords;
-  return y + (x - 1) * GRID_CONFIGURATION.columns;
+  return y + (x - 1) * grid_config.columns;
 }
 
-async function playNote(coords) {
+function playNote(coords) {
   const note = document.getElementById(getItemName(getNotePosition(coords)));
 
   note.classList = noteConfig.highlight;
   note.style.backgroundColor = noteConfig.highlight;
 
   const octave = Math.ceil(coords[0] / 8) + 2; // octaves are from 3 to 5
-  const tone = Math.ceil(coords[0] / GRID_CONFIGURATION.octaves);
-  await playSound(getToneName(tone) + octave);
+  const tone = Math.ceil(coords[0] / grid_config.octaves);
+  playSound(getToneName(tone) + octave);
 }
 
 async function playSound(note) {
@@ -100,10 +102,12 @@ async function playSound(note) {
 async function startLink() {
   const sequence = generateSequence();
   for (let i = 0; i < sequence.length; i++) {
-    // Handle pause
     if (document.getElementById("play").textContent === PLAY_KEYWORD) break;
-
-    if (sequence[i]) playNote([sequence[i], i]);
+    if (!sequence[i]) continue;
+    for (let note of sequence[i]) {
+      playNote([note, i]);
+      // Handle pause
+    }
     await sleep(noteConfig.triggerDelay);
   }
 }
@@ -111,27 +115,27 @@ async function startLink() {
 /**
  * Finds a note based on it's position in scale.
  * @param {number} index
- * @returns a minor scale note
+ * @returns b major scale note
  */
 function getToneName(index) {
   switch (index) {
     case 1:
-      return "a";
-    case 2:
       return "b";
+    case 2:
+      return "c-";
     case 3:
-      return "c";
+      return "d-";
     case 4:
-      return "d";
-    case 5:
       return "e";
+    case 5:
+      return "f-";
     case 6:
-      return "f";
+      return "g-";
     case 7:
-      return "g";
+      return "a-";
     case 8:
-      return "a";
+      return "b";
     default:
-      return "c";
+      return "b";
   }
 }

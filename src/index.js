@@ -1,27 +1,53 @@
-import { sleep } from "./utils.js";
 import { noteConfig, grid_config } from "./config.js";
 import { HIGHLIGHTED_CLASS, highlightColors } from "./style/constants.js";
+import { getToneName, getItemId, sleep } from "./utils.js";
 
 const PLAY_KEYWORD = "play";
 const PAUSE_KEYWORD = "pause";
 const PLAY_BUTTON_ID = "_play";
 
-const grid = document.getElementById("grid");
-grid.style.display = "grid";
-grid.style.gridTemplateColumns = `repeat(${grid_config.columns}, ${noteConfig.width}px)`;
-grid.style.gridTemplateRows = `repeat(${grid_config.getRows()}, ${
-  noteConfig.width
-}px)`;
+/**
+ * Inject notes grid into the DOM, setup columns based on grid configuration.
+ */
+(function initiateGrid() {
+  function buildGrid() {
+    for (let i = 0; i < grid_config.getRows() * grid_config.columns; i++) {
+      const item = document.createElement("div");
+      item.id = getItemId(i);
+      item.className = "note";
+      grid.append(item);
+    }
+  }
 
-document.addEventListener("keydown", (event) => {
+  const grid = document.getElementById("grid");
+  grid.style.display = "grid";
+  grid.style.gridTemplateColumns = `repeat(${grid_config.columns}, ${noteConfig.width}px)`;
+  grid.style.gridTemplateRows = `repeat(${grid_config.getRows()}, ${
+    noteConfig.width
+  }px)`;
+  buildGrid();
+})();
+
+document.addEventListener("keyup", (event) => {
   if (event.code === "Space") {
     togglePlay();
   }
 });
-
 document.getElementById(PLAY_BUTTON_ID).addEventListener("click", togglePlay);
-buildGrid();
 
+/**
+ * Clears highlighted notes from grid
+ * @returns void
+ */
+function clearGrid() {
+  Array.from(document.getElementsByClassName(HIGHLIGHTED_CLASS)).forEach(
+    (el) => (el.style.backgroundColor = noteConfig.defaultColor)
+  );
+}
+
+/**
+ * Enable/Disable music depending on the state of the play button.
+ */
 function togglePlay() {
   const playButton = document.getElementById(PLAY_BUTTON_ID);
   if (playButton.textContent === PLAY_KEYWORD) handlePlay();
@@ -38,22 +64,17 @@ function handlePause() {
   document.getElementById(PLAY_BUTTON_ID).textContent = PLAY_KEYWORD;
 }
 
-function clearGrid() {
-  Array.from(document.getElementsByClassName(HIGHLIGHTED_CLASS)).forEach(
-    (el) => (el.style.backgroundColor = noteConfig.defaultColor)
-  );
-}
-
-function getItemId(index) {
-  return "NOTE_" + index;
-}
-
-function buildGrid() {
-  for (let i = 0; i < grid_config.getRows() * grid_config.columns; i++) {
-    const item = document.createElement("div");
-    item.id = getItemId(i);
-    item.className = "note";
-    grid.append(item);
+async function startLink() {
+  const sequence = generateSequence();
+  for (let i = 0; i < sequence.length; i++) {
+    if (document.getElementById(PLAY_BUTTON_ID).textContent === PLAY_KEYWORD)
+      break;
+    if (!sequence[i]) continue;
+    for (let note of sequence[i]) {
+      playNote([note, i]);
+      // Handle pause
+    }
+    await sleep(noteConfig.triggerDelay);
   }
 }
 
@@ -67,7 +88,7 @@ function generateSequence() {
 
 function getSequenceValue(i) {
   // add swing
-  if (i !== 0 && i % 7 === 0 && i % 3 === 0) return null;
+  if (i !== 0 && i % 6 === 0) return null;
   if (i % 8 === 0) return [getRandomNotePosition(), getRandomNotePosition()];
 
   return [getRandomNotePosition()];
@@ -95,46 +116,4 @@ async function playSound(note) {
   const noteAudio = new Audio(`./data/notes/${note}.mp3`);
   await noteAudio.play();
   noteAudio.remove();
-}
-
-async function startLink() {
-  const sequence = generateSequence();
-  for (let i = 0; i < sequence.length; i++) {
-    if (document.getElementById(PLAY_BUTTON_ID).textContent === PLAY_KEYWORD)
-      break;
-    if (!sequence[i]) continue;
-    for (let note of sequence[i]) {
-      playNote([note, i]);
-      // Handle pause
-    }
-    await sleep(noteConfig.triggerDelay);
-  }
-}
-
-/**
- * Finds a note based on it's position in scale.
- * @param {number} index
- * @returns b major scale note
- */
-function getToneName(index) {
-  switch (index) {
-    case 1:
-      return "b";
-    case 2:
-      return "c-";
-    case 3:
-      return "d-";
-    case 4:
-      return "e";
-    case 5:
-      return "f-";
-    case 6:
-      return "g-";
-    case 7:
-      return "a-";
-    case 8:
-      return "b";
-    default:
-      return "b";
-  }
 }
